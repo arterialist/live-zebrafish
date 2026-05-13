@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Zebrafish Live Simulation</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="bar">
+      <div class="bar-row-metrics">
+        <div class="bar-status-group">
+          <span id="status">Disconnected</span>
+          <span id="online"></span>
+        </div>
+        <span class="hud-metric" title="Simulation step index">
+          <span class="hud-label">Tick</span>
+          <span id="tick" class="hud-value hud-value-rate">0</span>
+        </span>
+        <span class="hud-metric" title="Horizontal swimming speed">
+          <span class="hud-label">Speed</span>
+          <span id="speed" class="hud-value hud-value-rate">0.0</span>
+          <span class="hud-unit">mm/s</span>
+        </span>
+        <span class="hud-metric" title="Depth below the water surface">
+          <span class="hud-label">Depth</span>
+          <span id="depth" class="hud-value hud-value-rate">0.0</span>
+          <span class="hud-unit">mm</span>
+        </span>
+        <span class="hud-metric" title="Body pitch">
+          <span class="hud-label">Pitch</span>
+          <span id="pitch" class="hud-value hud-value-rate">0.0</span>
+          <span class="hud-unit">deg</span>
+        </span>
+        <span class="hud-metric" title="Bout drive decoded from the neural circuit">
+          <span class="hud-label">Drive</span>
+          <span id="drive" class="hud-value hud-value-rate">0.00</span>
+        </span>
+        <span class="hud-metric" title="Left-right motor bias">
+          <span class="hud-label">Turn</span>
+          <span id="turn" class="hud-value hud-value-rate">0.00</span>
+        </span>
+        <span class="bar-flex-spacer" aria-hidden="true"></span>
+        <button id="startle" type="button" title="Trigger a startle bout">
+          Startle
+        </button>
+        <button id="reconnect" type="button" title="Reconnect WebSocket">
+          Reconnect
+        </button>
+      </div>
+      <div class="bar-hint-row">
+        <span
+          >Desktop: orbit with left drag, pan with right drag, wheel zoom.
+          Bottom: PAULA neuron activity, hover for names.</span
+        >
+      </div>
+    </div>
+    <nav id="site-links" aria-label="Source and research">
+      <a
+        href="https://github.com/arterialist/neuron-model"
+        rel="noopener noreferrer"
+        target="_blank"
+        >neuron-model</a
+      >
+      <span class="sep" aria-hidden="true">|</span>
+      <a
+        href="https://github.com/arterialist/active-inference"
+        rel="noopener noreferrer"
+        target="_blank"
+        >active-inference</a
+      >
+      <span class="sep" aria-hidden="true">|</span>
+      <a
+        href="https://al.arteriali.st"
+        rel="noopener noreferrer"
+        target="_blank"
+        >Research at al.arteriali.st</a
+      >
+    </nav>
+    <div id="main-split">
+      <div id="fish-panel">
+        <div id="canvas-wrap">
+          <canvas id="scene"></canvas>
+        </div>
+      </div>
+      <div id="neural-panel" aria-label="neural activity">
+        <div id="neural-head">
+          <span>Neural activity</span>
+          <span id="neural-count">0 PAULA</span>
+        </div>
+        <div id="neurons"></div>
+      </div>
+    </div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>
