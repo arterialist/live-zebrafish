@@ -286,6 +286,9 @@ def register_simulation_specs(registry: ParameterRegistry) -> None:
         ("sim.body.turn_accel_rad_s2", "turn_accel_rad_s2", "Turn acceleration", 0.0, 160.0, 1.0, "Yaw acceleration gain from left/right tail imbalance."),
         ("sim.body.max_vertical_accel_m_s2", "max_vertical_accel_m_s2", "Vertical acceleration", 0.0, 1.0, 0.01, "Vertical acceleration gain from dorsal/ventral tail imbalance."),
         ("sim.body.pitch_drag_per_s", "pitch_drag_per_s", "Pitch drag", 0.0, 60.0, 0.1, "Pitch-rate damping."),
+        ("sim.body.pitch_restoring_per_s2", "pitch_restoring_per_s2", "Pitch restoring", 0.0, 80.0, 0.1, "Passive torque returning the fish toward a horizontal body axis."),
+        ("sim.body.pitch_nonlinear_restoring_per_s2", "pitch_nonlinear_restoring_per_s2", "High-pitch righting", 0.0, 180.0, 0.5, "Extra passive righting torque once pitch exceeds the high-pitch threshold."),
+        ("sim.body.pitch_nonlinear_threshold_rad", "pitch_nonlinear_threshold_rad", "Righting threshold", 0.0, 0.8, 0.01, "Pitch angle where nonlinear passive righting starts."),
         ("sim.body.depth_home_gain", "depth_home_gain", "Depth home gain", 0.0, 2.0, 0.01, "Passive correction toward preferred swim depth."),
     ]:
         specs.append(

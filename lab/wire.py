@@ -1,9 +1,10 @@
 """Compact wire encoding helpers for the lab WebSocket stream.
 
 Kept separate from the demo server's inline helpers so the lab can evolve the
-wire format independently (adds ``Bi``, ``Trefi``, ``ja``, ``jv``, ``tc``,
-``ma``, ``nm01``, ``M0i``, ``M1i`` per-neuron M_vector components, ``fe``,
-``z``) while reusing the same quantization rules.
+wire format independently (adds ``Bi``, ``Trefi``, ``hd``, ``pt``, ``ta``,
+``tpa``, ``ja``, ``jv``, ``tc``, ``ma``, ``nm01``, ``M0i``, ``M1i``
+per-neuron M_vector components, ``fe``, ``z``) while reusing the same
+quantization rules.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ import base64
 import math
 from typing import Any, Iterable
 
-PROTOCOL_VERSION = 6
+PROTOCOL_VERSION = 7
 WIRE_FLOAT_SIG_DIGITS = 10
 WIRE_SEGMENT_SIG_DIGITS = 6
 NEURAL_INT_SCALE = 1e4

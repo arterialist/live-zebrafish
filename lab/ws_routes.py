@@ -46,7 +46,7 @@ def _hello_payload(runtime: LabSimRuntime) -> dict[str, Any]:
     return {
         "p": wire.PROTOCOL_VERSION,
         "t": "h",
-        "m": "larval zebrafish lab v6: sm xyz×N body points, cm xyz, ja,jv,tc,ma,nm01,fe,z; Si,Ri,Bi,Trefi÷1e4; Fb bits",
+        "m": "larval zebrafish lab v7: sm xyz×N body points, cm xyz, hd,pt,ta,tpa,ja,jv,tc,ma,nm01,fe,z; Si,Ri,Bi,Trefi÷1e4; Fb bits",
         "L": {"nm": names, "ax": ax, "ay": ay},
         "M": meta,
         "L_body": {
@@ -80,6 +80,10 @@ def _state_payload(runtime: LabSimRuntime) -> dict[str, Any] | None:
             wire.mm_to_nm_int(frame.com_mm[1]),
             wire.mm_to_nm_int(frame.com_mm[2]),
         ],
+        "hd": wire.wire_float(frame.heading_rad),
+        "pt": wire.wire_float(frame.pitch_rad),
+        "ta": wire.scaled_int(frame.tail_angles, scale=wire.JOINT_INT_SCALE),
+        "tpa": wire.scaled_int(frame.tail_pitch_angles, scale=wire.JOINT_INT_SCALE),
         "Si": wire.scaled_int(frame.neuron_s, scale=wire.NEURAL_INT_SCALE),
         "Ri": wire.scaled_int(frame.neuron_r, scale=wire.NEURAL_INT_SCALE),
         "Bi": wire.scaled_int(frame.neuron_b, scale=wire.NEURAL_INT_SCALE),
