@@ -57,3 +57,14 @@ dist
 .vite
 *.log
 .DS_Store
+analysis/cache/
+analysis/**/*.10chFlt
+analysis/**/*.memmap
+analysis/**/*.npy
+analysis/**/*.npz
+analysis/**/*.joblib
+
+docs/*.pdf
+logs
+analysis/out
+analysis/recordings

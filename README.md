@@ -1,14 +1,12 @@
 # Larval zebrafish live demo & virtual lab
 
-This package is a source-level copy of `celegans-live-demo` adapted to the
-`active-inference` larval zebrafish stack. It keeps the same split:
+Interactive 3D simulation, neural connectome visualizer, and virtual lab suite for the MuJoCo embodied larval zebrafish model.
 
-1. **Canvas demo**: `zebrafish-demo-server-v2` streams compact no-food state to
-   the static `web/` Three.js aquarium viewer.
-2. **Virtual lab**: `zebrafish-lab-server-v2` exposes the REST and lab
-   WebSocket API used by `lab-web/`, with the copied C. elegans lab controls
-   retargeted to zebrafish body, connectome, muscle, and water-environment
-   parameters.
+This repository provides two primary entrypoints for interacting with the larval zebrafish simulation:
+
+1. **Canvas demo**: `zebrafish-demo-server-v2` streams compact physical and joint state to the static `web/` Three.js aquarium viewer.
+2. **Virtual lab**: `zebrafish-lab-server-v2` exposes a REST and WebSocket API used by `lab-web/` (a React/TypeScript application), enabling interactive control over zebrafish body, connectome, muscle, and fluid-environment parameters.
+
 
 Both entrypoints use the same simulation builder:
 `simulations.zebrafish.simulation.build_zebrafish_simulation(...)`.
@@ -73,10 +71,9 @@ Open:
 http://127.0.0.1:8086/?ws=ws://127.0.0.1:8776
 ```
 
-## Biological substitution points
+## Simulation Integration Points
 
-The copied C. elegans infrastructure remains recognizable, but the organism
-specific paths now point at zebrafish:
+The virtual lab maps system parameters and layouts to larval zebrafish biology at the following integration points:
 
 - Body and MuJoCo model: `active-inference/simulations/zebrafish/body.py`
 - Aquatic arena and stimuli: `active-inference/simulations/zebrafish/environment.py`
