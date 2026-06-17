@@ -14,6 +14,7 @@ dependencies = [
     "fastapi>=0.136",
     "uvicorn[standard]>=0.44",
     "pydantic>=2.13",
+    "opencv-python-headless>=4.10",
 ]
 
 [project.scripts]
