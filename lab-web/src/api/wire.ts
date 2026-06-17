@@ -1,6 +1,6 @@
 /** WebSocket wire decode helpers, mirroring ``lab/wire.py``. */
 
-export const PROTOCOL_VERSION = 6;
+export const PROTOCOL_VERSION = 7;
 export const NEURAL_INT_SCALE = 1e4;
 export const JOINT_INT_SCALE = 1e4;
 export const MUSCLE_INT_SCALE = 1e4;

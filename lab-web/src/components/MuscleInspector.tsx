@@ -58,7 +58,7 @@ export function MuscleInspector() {
   if (!selection || selection.kind !== "muscle" || !muscle || !view) {
     return (
       <div className="rounded-md border border-dashed border-zinc-800 p-6 text-center text-sm text-zinc-500">
-        Select a muscle from the WYSIWYG view or muscle map.
+        Select a muscle from the anatomy view or motor map.
       </div>
     );
   }

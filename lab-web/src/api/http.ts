@@ -196,6 +196,416 @@ export async function getBody(): Promise<BodyView> {
   return r.data;
 }
 
+export interface VideoStimulusState {
+  enabled: boolean;
+  gain: number;
+  has_frame: boolean;
+  file_name: string;
+  frame_index: number;
+  video_time_s: number;
+  received_tick: number | null;
+  age_ticks: number | null;
+  manual_advance_ticks?: number;
+  manual_sample_hz?: number;
+  visual_left: number;
+  visual_right: number;
+  optic_flow_left: number;
+  optic_flow_right: number;
+  lateral_line_left: number;
+  lateral_line_right: number;
+  visual_up: number;
+  visual_down: number;
+  light_level: number;
+  startle: number;
+  motion_energy: number;
+  asymmetry: number;
+  action_kick: number;
+  action_force: number;
+  action_side_score: number;
+  action_kick_score: number;
+  action_confidence: number;
+  zapbench_row: number;
+  backend_extracted: boolean;
+}
+
+export interface VideoStimulusFrame {
+  file_name: string;
+  frame_index: number;
+  video_time_s: number;
+  sample_hz?: number;
+  visual_left: number;
+  visual_right: number;
+  optic_flow_left: number;
+  optic_flow_right: number;
+  lateral_line_left: number;
+  lateral_line_right: number;
+  visual_up: number;
+  visual_down: number;
+  light_level: number;
+  startle: number;
+  motion_energy: number;
+  asymmetry: number;
+  enabled?: boolean;
+}
+
+export interface VideoStimulusSample {
+  slug: string;
+  file_name: string;
+  url: string;
+  bytes: number;
+  uploaded?: boolean;
+}
+
+export interface BackendVideoStimulusDiagnostics {
+  backend: string;
+  true_optical_flow: boolean;
+  camera_stabilized: boolean;
+  flow_coherence: number;
+  residual_flow_coherence: number;
+  camera_motion: number;
+  camera_shake: number;
+  compression_noise: number;
+  contrast: number;
+  flow_reliability: number;
+  global_horizontal_flow: number;
+  global_vertical_flow: number;
+  affine_inlier_ratio: number;
+  zapbench_grounded: boolean;
+  zapbench_row: number;
+  zapbench_distance: number;
+  zapbench_neighbor_rows: number[];
+  zapbench_neighbor_distance_mean: number;
+  zapbench_vector?: number[];
+}
+
+export interface BackendVideoStimulusFrameResult {
+  state: VideoStimulusState;
+  features: VideoStimulusFrame & {
+    backend_extracted: boolean;
+    action_kick: number;
+    action_force: number;
+    action_side_score: number;
+    action_kick_score: number;
+    action_confidence: number;
+    zapbench_row: number;
+  };
+  diagnostics: BackendVideoStimulusDiagnostics;
+}
+
+export async function getVideoStimulus(): Promise<VideoStimulusState> {
+  const r = await http.get<VideoStimulusState>("/video-stimulus");
+  return r.data;
+}
+
+export async function getVideoStimulusSamples(): Promise<VideoStimulusSample[]> {
+  const r = await http.get<{ samples: VideoStimulusSample[] }>("/video-stimulus/samples");
+  return r.data.samples;
+}
+
+export async function uploadVideoStimulus(file: File): Promise<VideoStimulusSample> {
+  const r = await http.post<VideoStimulusSample>("/video-stimulus/upload", file, {
+    params: { file_name: file.name },
+    headers: { "Content-Type": file.type || "application/octet-stream" },
+  });
+  return r.data;
+}
+
+export async function setVideoStimulusConfig(patch: {
+  enabled?: boolean;
+  gain?: number;
+  file_name?: string;
+}): Promise<VideoStimulusState> {
+  const r = await http.post<VideoStimulusState>("/video-stimulus/config", patch);
+  return r.data;
+}
+
+export async function postVideoStimulusFrame(
+  frame: VideoStimulusFrame,
+): Promise<VideoStimulusState> {
+  const r = await http.post<VideoStimulusState>("/video-stimulus/frame", frame);
+  return r.data;
+}
+
+export async function postBackendVideoStimulusFrame(frame: {
+  file_name: string;
+  frame_index: number;
+  video_time_s: number;
+  sample_hz?: number;
+  enabled?: boolean;
+}): Promise<BackendVideoStimulusFrameResult> {
+  const r = await http.post<BackendVideoStimulusFrameResult>("/video-stimulus/backend-frame", frame);
+  return r.data;
+}
+
+export async function clearVideoStimulus(): Promise<VideoStimulusState> {
+  const r = await http.post<VideoStimulusState>("/video-stimulus/clear");
+  return r.data;
+}
+
+export interface CalciumReplayState {
+  available: boolean;
+  enabled: boolean;
+  loop: boolean;
+  gain: number;
+  condition: string;
+  path: string;
+  source: string;
+  frame_index: number;
+  row: number;
+  calcium_time_s: number;
+  kick: number;
+  side: "none" | "left" | "right" | string;
+  side_score: number;
+  force: number;
+  kick_score: number;
+  confidence: number;
+  frames: number;
+  selected_frames: number;
+  condition_names: string[];
+  error: string;
+}
+
+export interface CalciumStimulusState {
+  enabled: boolean;
+  gain: number;
+  has_frame: boolean;
+  source: string;
+  row: number;
+  frame_index: number;
+  calcium_time_s: number;
+  received_tick: number | null;
+  age_ticks: number | null;
+  kick: number;
+  side: "none" | "left" | "right" | string;
+  side_score: number;
+  force: number;
+  kick_score: number;
+  confidence: number;
+  replay: CalciumReplayState;
+}
+
+export async function getCalciumStimulus(): Promise<CalciumStimulusState> {
+  const r = await http.get<CalciumStimulusState>("/calcium-stimulus");
+  return r.data;
+}
+
+export async function setCalciumReplay(patch: {
+  enabled?: boolean;
+  gain?: number;
+  condition?: string;
+  loop?: boolean;
+  replay_path?: string;
+}): Promise<CalciumReplayState> {
+  const r = await http.post<CalciumReplayState>("/calcium-stimulus/replay", patch);
+  return r.data;
+}
+
+export async function clearCalciumStimulus(): Promise<CalciumReplayState> {
+  const r = await http.post<CalciumReplayState>("/calcium-stimulus/clear");
+  return r.data;
+}
+
+export interface ZapbenchThresholdMetrics {
+  kick_accuracy: number;
+  kick_f1: number;
+  kick_precision: number;
+  kick_recall: number;
+  side_accuracy: number;
+  side_active_accuracy: number;
+  side_macro_accuracy: number;
+  side_non_none_rate_pred: number;
+  side_non_none_rate_true: number;
+}
+
+export interface ZapbenchSummary {
+  sources: { label: string; url: string }[];
+  bucket: Record<string, string>;
+  condition_names: string[];
+  condition_offsets: number[];
+  connectome_public: boolean;
+  connectome_note: string;
+  linear_direct: {
+    metrics: {
+      kick_accuracy: number;
+      force_r2: number;
+      force_mae: number;
+      side_accuracy: number;
+      direct_extra?: {
+        kick_f1: number;
+        side_active_accuracy: number;
+      };
+      thresholds?: {
+        default?: {
+          thresholds: Record<string, number>;
+          test: ZapbenchThresholdMetrics;
+        };
+        calibrated?: {
+          thresholds: Record<string, number>;
+          train: ZapbenchThresholdMetrics;
+          test: ZapbenchThresholdMetrics;
+        };
+      };
+    } | null;
+    artifact: {
+      path: string;
+      exists: boolean;
+      context?: number;
+      neurons?: number;
+      projection_components?: number;
+      metadata?: Record<string, unknown>;
+      thresholds?: Record<string, number>;
+      error?: string;
+    };
+    lag0_artifact: { path: string; exists: boolean; error?: string };
+    labels: {
+      path: string;
+      exists: boolean;
+      frames?: number;
+      kick_rate?: number;
+      force_mean?: number;
+      force_p95?: number;
+      side_counts?: { none: number; left: number; right: number };
+      samples?: { row: number; force: number; kick: boolean; side: number }[];
+      error?: string;
+    };
+    report_path: string;
+  };
+  stimulus_fallback: {
+    metrics: Record<string, unknown> | null;
+    artifact: { path: string; exists: boolean; error?: string };
+  };
+  nonlinear_experimental: {
+    metrics: {
+      metrics?: Record<string, Record<string, number>>;
+    } | null;
+    artifact_path: string;
+  };
+  research_notes: string[];
+}
+
+export async function getZapbenchSummary(): Promise<ZapbenchSummary> {
+  const r = await http.get<ZapbenchSummary>("/zapbench");
+  return r.data;
+}
+
+export interface ZapbenchConditionSegment {
+  id: number;
+  name: string;
+  start_row: number;
+  end_row: number;
+  length: number;
+  current?: boolean;
+  phase?: number;
+}
+
+export interface ZapbenchEphysTruth {
+  available: boolean;
+  path: string;
+  row?: number;
+  left_power?: number;
+  right_power?: number;
+  total_power?: number;
+  kick?: boolean;
+  side?: number;
+  side_class?: number;
+  side_name?: string;
+  force?: number;
+  raw_start_sample?: number;
+  raw_end_sample?: number;
+  raw_window_samples?: number;
+  reason?: string;
+  error?: string;
+}
+
+export interface ZapbenchActionRow {
+  available: boolean;
+  path: string;
+  artifact_path?: string;
+  row?: number;
+  calcium_time_s?: number;
+  kick?: boolean | number;
+  kick_score?: number;
+  side_score?: number;
+  side_class?: number;
+  side_name?: string;
+  force?: number;
+  confidence?: number;
+  is_train_row?: boolean;
+  is_test_row?: boolean;
+  thresholds?: Record<string, number>;
+  metadata?: Record<string, unknown>;
+  reason?: string;
+  error?: string;
+}
+
+export interface ZapbenchStimulusColumn {
+  index: number;
+  name: string;
+  group: string;
+  description: string;
+  value: number;
+  active: boolean;
+}
+
+export interface ZapbenchStimulusCovariates {
+  available: boolean;
+  path: string;
+  source?: string;
+  row?: number;
+  columns?: ZapbenchStimulusColumn[];
+  active_columns?: ZapbenchStimulusColumn[];
+  reason?: string;
+  error?: string;
+}
+
+export interface ZapbenchBrainPreview {
+  available: boolean;
+  path: string;
+  source?: string;
+  artifact_path?: string;
+  row?: number;
+  start_row?: number;
+  end_row?: number;
+  current_column?: number;
+  neuron_ids?: number[];
+  rows?: number[];
+  values?: number[][];
+  min?: number;
+  max?: number;
+  shape?: number[];
+  reason?: string;
+  error?: string;
+}
+
+export interface ZapbenchModelCard {
+  label: string;
+  metrics: Record<string, number | null | undefined>;
+  condition_metrics?: Record<string, number>;
+  nonlinear_experimental?: Record<string, unknown>;
+  artifact: ZapbenchSummary["linear_direct"]["artifact"];
+  label_artifact: ZapbenchSummary["linear_direct"]["labels"];
+  decoder_note: string;
+}
+
+export interface ZapbenchReplayDetail {
+  row: number;
+  condition: ZapbenchConditionSegment;
+  condition_timeline: ZapbenchConditionSegment[];
+  ephys_truth: ZapbenchEphysTruth;
+  replay_action: ZapbenchActionRow;
+  decoder_prediction: ZapbenchActionRow;
+  stimulus_covariates: ZapbenchStimulusCovariates;
+  brain_preview: ZapbenchBrainPreview;
+  model_card: ZapbenchModelCard;
+}
+
+export async function getZapbenchReplayDetail(row?: number): Promise<ZapbenchReplayDetail> {
+  const r = await http.get<ZapbenchReplayDetail>("/zapbench/replay-detail", {
+    params: typeof row === "number" ? { row } : undefined,
+  });
+  return r.data;
+}
+
 export interface MuscleDetail {
   name: string;
   id: number;

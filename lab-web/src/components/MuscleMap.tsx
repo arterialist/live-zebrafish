@@ -1,9 +1,16 @@
 import { useEffect, useRef } from "react";
+import type { MouseEvent } from "react";
 import { useBodyStore } from "../state/body";
 import { useLabStore } from "../state/store";
 
-const SIDES = ["D", "L", "R", "V"] as const;
-type Side = (typeof SIDES)[number];
+const ROWS = [
+  { side: "L", label: "left yaw", base: [58, 69, 78] },
+  { side: "R", label: "right yaw", base: [58, 69, 78] },
+  { side: "D", label: "dorsal pitch", base: [42, 63, 86] },
+  { side: "V", label: "ventral pitch", base: [76, 62, 45] },
+] as const;
+
+type Side = (typeof ROWS)[number]["side"];
 
 interface MuscleCell {
   side: Side;
@@ -13,38 +20,35 @@ interface MuscleCell {
 }
 
 const MUSCLE_NAME_RE = /^tail_(\d+)_(left|right|dorsal|ventral)$/;
+const SIDE_BY_NAME = {
+  left: "L",
+  right: "R",
+  dorsal: "D",
+  ventral: "V",
+} as const;
 
 function parseMuscles(actuators: { id: number; name: string }[]): MuscleCell[] {
   const cells: MuscleCell[] = [];
-  for (const a of actuators) {
-    const m = MUSCLE_NAME_RE.exec(a.name);
+  for (const actuator of actuators) {
+    const m = MUSCLE_NAME_RE.exec(actuator.name);
     if (!m) continue;
     cells.push({
-      side: ({ left: "L", right: "R", dorsal: "D", ventral: "V" } as const)[
-        m[2] as "left" | "right" | "dorsal" | "ventral"
-      ],
+      side: SIDE_BY_NAME[m[2] as keyof typeof SIDE_BY_NAME],
       seg: Number(m[1]),
-      id: a.id,
-      name: a.name,
+      id: actuator.id,
+      name: actuator.name,
     });
   }
   return cells;
 }
 
-function activationColor(a: number): string {
-  const c = Math.max(-1, Math.min(1, a));
-  if (c >= 0) {
-    // Positive: orange/red
-    const t = c;
-    const r = Math.round(40 + 215 * t);
-    const g = Math.round(40 + 80 * t);
-    return `rgb(${r}, ${g}, 40)`;
-  } else {
-    const t = -c;
-    const b = Math.round(40 + 215 * t);
-    const g = Math.round(40 + 150 * t);
-    return `rgb(40, ${g}, ${b})`;
-  }
+function activationColor(a: number, base: readonly number[]): string {
+  const t = Math.max(0, Math.min(1, Math.abs(a)));
+  const target = a >= 0 ? [242, 128, 72] : [74, 166, 230];
+  const r = Math.round(base[0] + (target[0] - base[0]) * t);
+  const g = Math.round(base[1] + (target[1] - base[1]) * t);
+  const b = Math.round(base[2] + (target[2] - base[2]) * t);
+  return `rgb(${r}, ${g}, ${b})`;
 }
 
 export function MuscleMap() {
@@ -55,9 +59,7 @@ export function MuscleMap() {
   const rafRef = useRef<number | null>(null);
 
   const cells = view ? parseMuscles(view.actuators) : [];
-  const segCount = cells.reduce((m, c) => Math.max(m, c.seg), 0);
-
-  // Hit-testing table: cell index → {id, name}.
+  const segmentCount = cells.reduce((max, c) => Math.max(max, c.seg + 1), 0);
   const cellIndexRef = useRef<MuscleCell[]>(cells);
   cellIndexRef.current = cells;
 
@@ -79,45 +81,69 @@ export function MuscleMap() {
       const H = rect.height;
       ctx.clearRect(0, 0, W, H);
 
-      const padL = 48;
-      const padT = 20;
-      const padR = 8;
-      const padB = 20;
-      const gx = (W - padL - padR) / Math.max(segCount + 1, 1);
-      const gy = (H - padT - padB) / SIDES.length;
+      const padL = 96;
+      const padT = 34;
+      const padR = 18;
+      const padB = 28;
+      const count = Math.max(segmentCount, 1);
+      const gx = (W - padL - padR) / count;
+      const gy = (H - padT - padB) / ROWS.length;
 
       ctx.font = "11px ui-monospace, monospace";
       ctx.textBaseline = "middle";
       ctx.fillStyle = "#8ba3c7";
-      for (let s = 0; s < SIDES.length; s++) {
-        ctx.fillText(SIDES[s], 4, padT + gy * (s + 0.5));
+      ctx.textAlign = "left";
+      ctx.fillText("tail base", padL, 14);
+      ctx.textAlign = "right";
+      ctx.fillText("tail tip", W - padR, 14);
+
+      ctx.strokeStyle = "#242833";
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(padL, 23);
+      ctx.lineTo(W - padR, 23);
+      ctx.stroke();
+
+      for (let row = 0; row < ROWS.length; row++) {
+        const y = padT + gy * row;
+        ctx.fillStyle = row < 2 ? "rgba(75, 91, 105, 0.12)" : "rgba(76, 73, 94, 0.12)";
+        ctx.fillRect(padL, y, W - padL - padR, gy - 1);
+        ctx.fillStyle = "#8ba3c7";
+        ctx.textAlign = "left";
+        ctx.fillText(ROWS[row].label, 12, y + gy * 0.5);
       }
+
       ctx.textAlign = "center";
-      for (let seg = 0; seg <= segCount; seg++) {
-        ctx.fillText(String(seg), padL + gx * (seg + 0.5), padT - 8);
+      ctx.fillStyle = "#667895";
+      for (let seg = 0; seg < count; seg++) {
+        if (seg % 2 === 0 || count <= 12) {
+          ctx.fillText(String(seg).padStart(2, "0"), padL + gx * (seg + 0.5), H - 12);
+        }
       }
 
       const latest = useLabStore.getState().latest;
       const ma = latest?.ma ?? null;
 
       for (const cell of cellIndexRef.current) {
-        const sIdx = SIDES.indexOf(cell.side);
-        const col = cell.seg;
-        const x = padL + gx * col;
-        const y = padT + gy * sIdx;
-
+        const row = ROWS.findIndex((r) => r.side === cell.side);
+        if (row < 0) continue;
+        const x = padL + gx * cell.seg;
+        const y = padT + gy * row;
         const a = ma ? ma[cell.id] ?? 0 : 0;
-        ctx.fillStyle = activationColor(a);
+        ctx.fillStyle = activationColor(a, ROWS[row].base);
         ctx.fillRect(x + 1, y + 1, gx - 2, gy - 2);
+
+        ctx.strokeStyle = "rgba(5, 7, 10, 0.42)";
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x + 1, y + 1, gx - 2, gy - 2);
 
         if (selection && selection.kind === "muscle" && selection.id === cell.id) {
           ctx.strokeStyle = "#7ab6ff";
           ctx.lineWidth = 2;
-          ctx.strokeRect(x + 1, y + 1, gx - 2, gy - 2);
+          ctx.strokeRect(x + 2, y + 2, gx - 4, gy - 4);
         }
       }
 
-      ctx.textAlign = "start";
       rafRef.current = requestAnimationFrame(draw);
     };
 
@@ -125,25 +151,26 @@ export function MuscleMap() {
     return () => {
       if (rafRef.current != null) cancelAnimationFrame(rafRef.current);
     };
-  }, [view, selection, segCount]);
+  }, [view, selection, segmentCount]);
 
-  const handleClick = (evt: React.MouseEvent<HTMLCanvasElement>) => {
+  const handleClick = (evt: MouseEvent<HTMLCanvasElement>) => {
     const canvas = canvasRef.current;
     if (!canvas || !view) return;
     const rect = canvas.getBoundingClientRect();
     const mx = evt.clientX - rect.left;
     const my = evt.clientY - rect.top;
 
-    const padL = 48;
-    const padT = 20;
-    const padR = 8;
-    const padB = 20;
-    const gx = (rect.width - padL - padR) / Math.max(segCount + 1, 1);
-    const gy = (rect.height - padT - padB) / SIDES.length;
+    const padL = 96;
+    const padT = 34;
+    const padR = 18;
+    const padB = 28;
+    const count = Math.max(segmentCount, 1);
+    const gx = (rect.width - padL - padR) / count;
+    const gy = (rect.height - padT - padB) / ROWS.length;
     const col = Math.floor((mx - padL) / gx);
     const row = Math.floor((my - padT) / gy);
-    if (col < 0 || col > segCount || row < 0 || row >= SIDES.length) return;
-    const side = SIDES[row];
+    if (col < 0 || col >= count || row < 0 || row >= ROWS.length) return;
+    const side = ROWS[row].side;
     const cell = cellIndexRef.current.find((c) => c.seg === col && c.side === side);
     if (!cell) return;
     if (selection && selection.kind === "muscle" && selection.id === cell.id) {

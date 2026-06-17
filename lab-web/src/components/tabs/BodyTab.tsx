@@ -9,8 +9,8 @@ import { TabShell } from "./TabShell";
 type Sub = "wysiwyg" | "map" | "inspector";
 
 const SUBS: { id: Sub; label: string }[] = [
-  { id: "wysiwyg", label: "WYSIWYG" },
-  { id: "map", label: "Muscle Map" },
+  { id: "wysiwyg", label: "Anatomy" },
+  { id: "map", label: "Motor Map" },
   { id: "inspector", label: "Inspector" },
 ];
 
@@ -26,14 +26,22 @@ export function BodyTab() {
     void load();
   }, [load]);
 
-  // Auto-switch to inspector only from the map, not from WYSIWYG.
+  // Auto-switch to inspector only from the motor map, not from the anatomy view.
   useEffect(() => {
     if (!selection || selection.kind !== "muscle") return;
     if (sub === "map") setSub("inspector");
   }, [selection, sub]);
 
+  const tailLinks = view
+    ? view.bodies.filter((b) => b.name.startsWith("tail_segment_")).length
+    : 0;
+  const axialJoints = view
+    ? view.joints.filter(
+        (j) => j.name.startsWith("tail_yaw_") || j.name.startsWith("tail_pitch_"),
+      ).length
+    : 0;
   const summary = view
-    ? `${view.bodies.length - 1} segments · ${view.joints.length} joints · ${
+    ? `head/trunk + ${tailLinks} tail links · ${axialJoints} yaw/pitch joints · ${
         view.actuators.length
       } muscles`
     : loading
@@ -45,7 +53,7 @@ export function BodyTab() {
   return (
     <TabShell
       title="Body"
-      subtitle="MuJoCo model: segments, muscles, joints. Click a muscle to inspect and tune live."
+      subtitle="Larval zebrafish MuJoCo body: head/trunk, eyes, yolk, swim bladder, and a 16-link axial tail with yaw and pitch muscles."
     >
       <div className="flex min-h-0 flex-1 flex-col gap-3">
         <div className="flex items-center justify-between">

@@ -35,6 +35,14 @@ export interface StateFrame {
   segments_mm: Float32Array;
   /** Mass-weighted COM in mm. */
   com_mm: [number, number, number];
+  /** Fish body axis heading in radians, measured in the dish plane. */
+  heading_rad: number;
+  /** Fish body axis pitch in radians. */
+  pitch_rad: number;
+  /** Axial yaw joint angles in head-to-tail order. */
+  tail_angles: Float32Array;
+  /** Axial pitch joint angles in head-to-tail order. */
+  tail_pitch_angles: Float32Array;
   S: Float32Array;
   R: Float32Array;
   B: Float32Array;
@@ -87,6 +95,16 @@ export function decodeMessage(
       running: obj.z !== 1,
       segments_mm: decodeSegmentsMm(obj.sm as number[]),
       com_mm: decodeComMm(obj.cm as number[]),
+      heading_rad: Number(obj.hd ?? 0),
+      pitch_rad: Number(obj.pt ?? 0),
+      tail_angles: decodeScaled(
+        Array.isArray(obj.ta) ? (obj.ta as number[]) : [],
+        JOINT_INT_SCALE,
+      ),
+      tail_pitch_angles: decodeScaled(
+        Array.isArray(obj.tpa) ? (obj.tpa as number[]) : [],
+        JOINT_INT_SCALE,
+      ),
       S: decodeScaled(obj.Si as number[], NEURAL_INT_SCALE),
       R: decodeScaled(obj.Ri as number[], NEURAL_INT_SCALE),
       B: decodeScaled(obj.Bi as number[], NEURAL_INT_SCALE),
