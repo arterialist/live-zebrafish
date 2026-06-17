@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "zebrafish-live-demo-v2"
+name = "zebrafish-live-demo"
 version = "0.1.0"
 description = "larval zebrafish live viewers: WebSocket canvas demo and FastAPI/React virtual lab (lab + lab-web)"
 # Match active-inference: mujoco has no cp314 wheels yet (sdist needs MUJOCO_PATH).
@@ -18,8 +18,8 @@ dependencies = [
 ]
 
 [project.scripts]
-zebrafish-demo-server-v2 = "zebrafish_live_demo.server:main"
-zebrafish-lab-server-v2 = "lab.server:main"
+zebrafish-demo-server = "zebrafish_live_demo.server:main"
+zebrafish-lab-server = "lab.server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["zebrafish_live_demo", "lab"]

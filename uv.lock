@@ -1988,7 +1988,7 @@ wheels = [
 ]
 
 [[package]]
-name = "zebrafish-live-demo-v2"
+name = "zebrafish-live-demo"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [

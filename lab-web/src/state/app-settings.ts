@@ -48,6 +48,6 @@ export const useAppSettings = create<AppSettingsStore>()(
       set: (key, value) => set({ [key]: value } as Partial<AppSettingsStore>),
       reset: () => set({ ...DEFAULTS }),
     }),
-    { name: "zebrafish-lab-v2.app-settings/v3" },
+    { name: "zebrafish-lab.app-settings/v3" },
   ),
 );

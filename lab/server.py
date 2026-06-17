@@ -1,4 +1,4 @@
-"""Entrypoint: ``zebrafish-lab-server-v2``.
+"""Entrypoint: ``zebrafish-lab-server``.
 
 Starts a FastAPI app on ``localhost:8765`` with:
     GET  /api/health
