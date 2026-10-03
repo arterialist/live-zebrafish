@@ -210,8 +210,8 @@ def _render_report(results: dict[str, Any]) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rest-url", default="http://127.0.0.1:8811/api")
-    parser.add_argument("--ws-url", default="ws://127.0.0.1:8811/ws/state")
+    parser.add_argument("--rest-url", default="http://127.0.0.1:8765/api")
+    parser.add_argument("--ws-url", default="ws://127.0.0.1:8765/ws/state")
     parser.add_argument("--calcium-condition", default="turning")
     parser.add_argument("--calcium-gain", type=float, default=1.0)
     parser.add_argument("--calcium-frames", type=int, default=900)

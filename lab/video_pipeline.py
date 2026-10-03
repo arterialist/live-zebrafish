@@ -12,6 +12,7 @@ from functools import lru_cache
 import hashlib
 import math
 from pathlib import Path
+from threading import Lock
 from typing import Any
 
 import cv2
@@ -54,6 +55,10 @@ class BackendVideoFrame:
     diagnostics: dict[str, Any]
 
 
+class VideoCalibrationUnavailableError(RuntimeError):
+    """Calibrated video extraction requires locally retained ZAPBench data."""
+
+
 def safe_upload_name(file_name: str) -> str:
     suffix = Path(file_name).suffix.lower()
     stem = Path(file_name).stem
@@ -77,7 +82,8 @@ class BackendVideoPipeline:
         self.upload_root = upload_root
         self.upload_root.mkdir(parents=True, exist_ok=True)
         self._clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        self._calibration = _load_zapbench_calibration(cache_root)
+        self._calibration: ZapbenchVideoCalibrator | None = None
+        self._calibration_lock = Lock()
         self._simzfish = SimZFishOMRActionAdapter()
         self._action_calibration = dict(
             DEFAULT_VIDEO_ACTION_CALIBRATION if action_calibration is None else RAW_VIDEO_ACTION_CALIBRATION
@@ -90,6 +96,17 @@ class BackendVideoPipeline:
     def uploaded_path(self, file_name: str) -> Path:
         return self.upload_root / safe_upload_name(file_name)
 
+    def _require_calibration(self) -> ZapbenchVideoCalibrator:
+        with self._calibration_lock:
+            if self._calibration is None:
+                try:
+                    self._calibration = _load_zapbench_calibration(self.cache_root)
+                except FileNotFoundError as exc:
+                    raise VideoCalibrationUnavailableError(
+                        f"calibrated video extraction is unavailable: {exc}"
+                    ) from exc
+            return self._calibration
+
     def extract(
         self,
         *,
@@ -99,6 +116,7 @@ class BackendVideoPipeline:
         video_time_s: float,
         sample_hz: float,
     ) -> BackendVideoFrame:
+        calibration = self._require_calibration()
         sample_hz = max(1.0, float(sample_hz))
         current = _read_frame(path, video_time_s)
         previous = _read_frame(path, max(0.0, float(video_time_s) - 1.0 / sample_hz))
@@ -144,7 +162,7 @@ class BackendVideoPipeline:
             video_time_s=video_time_s,
             sample_hz=sample_hz,
         )
-        zap_action, zapbench = self._calibration.action_from_features(features, diagnostics)
+        zap_action, zapbench = calibration.action_from_features(features, diagnostics)
         features.update(latent.to_legacy_action_fields())
         features.update(
             {

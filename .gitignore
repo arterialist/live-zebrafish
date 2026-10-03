@@ -57,6 +57,7 @@ dist
 .vite
 *.log
 .DS_Store
+# Downloaded media and derived stimulus caches stay local.
 analysis/cache/
 analysis/**/*.10chFlt
 analysis/**/*.memmap

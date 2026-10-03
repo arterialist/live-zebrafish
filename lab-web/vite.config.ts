@@ -3,6 +3,8 @@ import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 import path from "node:path";
 
+const backendUrl = process.env.ZEBRAFISH_LAB_BACKEND ?? "http://127.0.0.1:8765";
+
 export default defineConfig({
   plugins: [react(), tailwindcss()],
   resolve: {
@@ -12,8 +14,8 @@ export default defineConfig({
     port: 5173,
     strictPort: true,
     proxy: {
-      "/api": { target: "http://127.0.0.1:8811", changeOrigin: true },
-      "/ws": { target: "ws://127.0.0.1:8811", ws: true, changeOrigin: true },
+      "/api": { target: backendUrl, changeOrigin: true },
+      "/ws": { target: backendUrl.replace(/^http/, "ws"), ws: true, changeOrigin: true },
     },
   },
 });

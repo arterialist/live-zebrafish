@@ -75,15 +75,18 @@ zero physical turnaround.
 ### Dev
 
 ```bash
-# Terminal A — lab backend on :8765 (or :8811 if you changed the default)
-cd ../zebrafish-live-demo-v2
-uv run zebrafish-lab-server-v2
+# Terminal A — lab backend on :8765
+cd ../zebrafish-live-demo
+uv run zebrafish-lab-server
 
 # Terminal B — frontend on :5173, proxies /api and /ws to the backend
 cd lab-web
 npm install
 npm run dev
 ```
+
+If the backend uses another port, start Vite with, for example,
+`ZEBRAFISH_LAB_BACKEND=http://127.0.0.1:8811 npm run dev`.
 
 ### Build
 
@@ -93,7 +96,7 @@ npm run preview # serves dist/
 ```
 
 Production: serve `dist/` behind the same origin that proxies `/api` and `/ws`
-to `zebrafish-lab-server-v2` (the dev proxy in `vite.config.ts` is dev-only).
+to `zebrafish-lab-server` (the dev proxy in `vite.config.ts` is dev-only).
 
 ---
 
@@ -107,7 +110,7 @@ zebrafish-lab-server-v2 (FastAPI + LabSimRuntime thread)
     ├── REST /api/*        ─── axios → src/api/http.ts ─── Zustand stores
     │   (connectome, body, schema, neuron detail, transport, pacing, patches)
     │
-    └── WS   /ws/state     ─── wire v5 frames → src/api/wire.ts
+    └── WS   /ws/state     ─── wire v7 frames → src/api/wire.ts
                                  └── decodeMessage → useLabStore.latest
 ```
 
@@ -117,7 +120,7 @@ zebrafish-lab-server-v2 (FastAPI + LabSimRuntime thread)
 | ------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `src/api/http.ts`                                                        | Axios-only REST client. `fetch` is banned by `eslint.config.js` (`no-restricted-globals`) so every HTTP call flows through a single, typed surface. |
 | `src/api/wire.ts`                                                        | WebSocket frame decoders mirroring `lab/wire.py` (segment geometry, COM, neural summaries, joints/muscles, touch, neuromods, firing bits).          |
-| `src/state/store.ts`                                                     | Main Zustand store + `decodeMessage` for hello / state frames (wire protocol **v5**).                                                               |
+| `src/state/store.ts`                                                     | Main Zustand store + `decodeMessage` for hello / state frames (wire protocol **v7**).                                                               |
 | `src/state/ws.ts`                                                        | Reconnecting WebSocket hook with exponential backoff.                                                                                               |
 | `src/state/connectome.ts`, `state/body.ts`, `state/schema.ts`            | Lazy-loaded REST snapshots + staged-patch buffers.                                                                                                  |
 | `src/state/app-settings.ts`                                              | Persisted UI preferences (sparkline history, FPS cap, overlay toggles, 2D/3D mode, connectome dot scale).                                           |
@@ -151,7 +154,7 @@ The right pane shows the zebrafish itself (2D or 3D) with the status HUD (free
 energy + M0 maneuver/stress + M1 swim-drive sparklines) and the transport bar pinned to the
 bottom.
 
-### Wire protocol (v5)
+### Wire protocol (v7)
 
 See `lab/wire.py` and `src/api/wire.ts`. One hello frame (`t: "h"`) carries
 layout + per-neuron class/degree metadata and labels for joints, muscles, and

@@ -20,7 +20,11 @@ from lab.introspect.connectome_introspect import build_connectome_view
 from lab.parameters import ParameterRegistry
 from lab.parameters.applicators import apply_patches
 from lab.sim_runtime import LabSimRuntime
-from lab.video_pipeline import BackendVideoPipeline, safe_upload_name
+from lab.video_pipeline import (
+    BackendVideoPipeline,
+    VideoCalibrationUnavailableError,
+    safe_upload_name,
+)
 
 
 class TransportAction(BaseModel):
@@ -1191,6 +1195,8 @@ def build_rest_router(app_ctx: AppContext) -> APIRouter:
             }
         except HTTPException:
             raise
+        except VideoCalibrationUnavailableError as exc:
+            raise HTTPException(status_code=503, detail=str(exc)) from exc
         except Exception as exc:  # noqa: BLE001
             raise HTTPException(status_code=500, detail=str(exc)) from exc
 

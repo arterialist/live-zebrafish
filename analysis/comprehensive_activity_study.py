@@ -1495,8 +1495,8 @@ async def run_study(args: argparse.Namespace) -> dict[str, Any]:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--rest-url", default="http://127.0.0.1:8811/api")
-    parser.add_argument("--ws-url", default="ws://127.0.0.1:8811/ws/state")
+    parser.add_argument("--rest-url", default="http://127.0.0.1:8765/api")
+    parser.add_argument("--ws-url", default="ws://127.0.0.1:8765/ws/state")
     parser.add_argument("--output-dir", default="")
     parser.add_argument("--calcium-condition", default="all")
     parser.add_argument("--calcium-gain", type=float, default=1.0)

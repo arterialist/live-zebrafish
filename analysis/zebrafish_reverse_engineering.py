@@ -367,7 +367,7 @@ def summarize(frames: list[Frame]) -> dict[str, Any]:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--source", choices=["live", "offline"], default="live")
-    parser.add_argument("--url", default="ws://127.0.0.1:8811/ws/state")
+    parser.add_argument("--url", default="ws://127.0.0.1:8765/ws/state")
     parser.add_argument("--frames", type=int, default=240)
     parser.add_argument("--timeout-s", type=float, default=10.0)
     parser.add_argument("--offline-steps", type=int, default=2000)

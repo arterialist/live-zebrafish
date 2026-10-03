@@ -5,6 +5,17 @@ This package ships **two** ways to drive the same [active-inference](https://git
 1. **Canvas demo** — `zebrafish-demo-server` streams compact physical and neural state to the static **`web/`** Three.js aquarium viewer.
 2. **Virtual lab** — `zebrafish-lab-server` (**`lab/`**) exposes REST + a richer WebSocket protocol; **`lab-web/`** is a React + Vite app for body, muscle, connectome, and environment controls, neuron inspector, video stimulus pipeline (optical flow extraction), and calcium stimulus replays.
 
+Video replay requires a local or uploaded video. Downloaded clips and derived
+stimulus caches under `analysis/cache/` are excluded from Git; a clean checkout
+does not include the `commons_black_rockfish_stereo_dov` sample.
+
+The core lab starts without cached research data. Calibrated backend video
+extraction additionally requires the local ZAPBench stimulus cache at
+`analysis/cache/zapbench/zapbench_stimulus_features.npz` and direct ephys labels
+at `analysis/out/zapbench_ephys_action_decoder/direct_ephys_labels.npz`.
+`POST /api/video-stimulus/backend-frame` returns HTTP 503 when either is missing.
+It does not substitute generated calibration data.
+
 Both entrypoints use the same simulation builder:
 `simulations.zebrafish.simulation.build_zebrafish_simulation(...)`.
 
