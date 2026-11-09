@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 name = "zebrafish-live-demo"
 version = "0.1.0"
 description = "larval zebrafish live viewers: WebSocket canvas demo and FastAPI/React virtual lab (lab + lab-web)"
-# Match active-inference: mujoco has no cp314 wheels yet (sdist needs MUJOCO_PATH).
+# Match active-inference: the stack is only tested on Python 3.11–3.13.
 requires-python = ">=3.11,<3.14"
 dependencies = [
     "active-inference",
